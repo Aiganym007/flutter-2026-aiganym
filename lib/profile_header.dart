@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 class ProfileHeader extends StatelessWidget {
   const ProfileHeader({
     super.key,
@@ -29,10 +30,7 @@ class ProfileHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          university,
-          style: TextStyle(color: colors.onSurfaceVariant),
-        ),
+        Text(university, style: TextStyle(color: colors.onSurfaceVariant)),
       ],
     );
   }

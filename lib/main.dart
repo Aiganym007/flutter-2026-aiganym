@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+
 import 'data.dart';
 import 'info_row.dart';
 import 'profile_header.dart';
+
 void main() => runApp(const MyApp());
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
