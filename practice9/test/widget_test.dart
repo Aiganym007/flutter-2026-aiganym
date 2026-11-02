@@ -1,30 +1,57 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:provider/provider.dart';
 import 'package:put_it_high/main.dart';
+import 'package:put_it_high/models/book.dart';
+import 'package:put_it_high/models/cart.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('Cart model (no widgets)', () {
+    test('add refuses duplicates', () {
+      final cart = Cart();
+      expect(cart.add(books[0]), isTrue);
+      expect(cart.add(books[0]), isFalse);
+      expect(cart.count, 1);
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    test('total multiplies price by quantity', () {
+      final cart = Cart()
+        ..add(books[0])
+        ..add(books[1])
+        ..increment(books[1]);
+      expect(cart.qtyOf(books[1]), 2);
+      expect(cart.total, books[0].price + books[1].price * 2);
+      expect(cart.count, 2);
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    test('items is unmodifiable', () {
+      final cart = Cart()..add(books[0]);
+      expect(() => cart.items.add(books[1]), throwsUnsupportedError);
+    });
+
+    test('every mutation notifies', () {
+      final cart = Cart();
+      var calls = 0;
+      cart.addListener(() => calls++);
+      cart.add(books[0]);
+      cart.increment(books[0]);
+      cart.remove(books[0]);
+      cart.clear();
+      expect(calls, 4);
+    });
+  });
+
+  testWidgets('Add puts a book in the cart and shows the badge', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ChangeNotifierProvider(create: (_) => Cart(), child: const Shell()),
+    );
+
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Add').first);
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
+    expect(find.text('Added'), findsNWidgets(2));
   });
 }
